@@ -1,0 +1,36 @@
+"Cronjob info"
+type Cronjob {
+  "Cronjob id"
+  id: ID
+  "Current device status"
+  name: String
+  "Event type"
+  eventType: String
+  "Cronjob body params"
+  body: Parameter,
+  "Cronjob version"
+  version: Int,
+}
+
+"Current device status"
+type Parameter {
+  "Device serial"
+  key: String
+  "Display serial"
+  value: String  
+}
+
+type Query {
+  "Get device detail filtered by the device id"
+  getCronjobDetail(id: ID!): Cronjob
+
+  "Get all devices"
+  getCronjobs(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [Cronjob]
+
+  "Get the size of table Device"
+  getDeviceTableSize: Int
+}
+
+type Mutation {
+  persistCronjob(cronjob: Cronjob): Cronjob
+}

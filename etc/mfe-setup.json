@@ -1,0 +1,44 @@
+[
+  {
+    "name": "cronjob",
+    "src": "frontend/emi/cronjob",
+    "groups": [
+      {
+        "id": "SYSTEM",
+        "icon": "location_searching",
+        "translate": {
+          "en": "System",
+          "es": "Sistema"
+        },
+        "priority": 1000
+      }
+    ],
+    "contents": [
+      {
+        "groupId": "SYSTEM",
+        "id": "cronjob",
+        "icon": "speaker_phone",
+        "translate": {
+          "en": "Scheduled tasks",
+          "es": "Tareas programadas"
+        },
+        "navURL": "/cronjob",
+        "path": "cronjob",
+        "loadChildren": "./main/content/cronjob/cronjob.module#CronjobModule",
+        "priority": 100000
+      }
+    ],
+    "preBuildCommands": [],
+    "environmentVars": {
+      "default": {
+        "production": false
+      },
+      "local": {
+        "production": false
+      },
+      "prod": {
+        "production": true
+      }
+    }
+  }
+]
