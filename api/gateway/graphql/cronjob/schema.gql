@@ -1,0 +1,65 @@
+"Cronjob info"
+type Cronjob {
+  "Cronjob id"
+  id: ID
+  "Cronjob name"
+  name: String
+  "Event type"
+  eventType: String
+  "Cronjob format based on https://www.npmjs.com/package/node-schedule#cron-style-scheduling"
+  cronjobFormat: String
+  "Parameters of cronjob"
+  body: String,
+  "Cronjob version"
+  version: Int,
+}
+
+input CronjobPersistInput {
+  "Cronjob name"
+  name: String!
+  "Event type"
+  eventType: String!
+  "Cronjob format based on https://www.npmjs.com/package/node-schedule#cron-style-scheduling"
+  cronjobFormat: String!
+  "Parameters of cronjob"
+  body: String
+}
+
+input CronjobUpdateInput {
+  "unique Cronjob id"
+  id: String
+  "Cronjob name"
+  name: String
+  "Event type"
+  eventType: String
+  "Cronjob format based on https://www.npmjs.com/package/node-schedule#cron-style-scheduling"
+  cronjobFormat: String
+  "Parameters of cronjob"
+  body: String
+  "Cronjob status"
+  active: Boolean
+}
+
+"Current device status"
+type Parameter {
+  "Parameter key"
+  key: String
+  "Parameter value"
+  value: String  
+}
+
+type Query {
+  "Get Cronjob filtered by the device id"
+  getCronjobDetail(id: ID!): Cronjob
+
+  "Get all cronjobs"
+  getCronjobs(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [Cronjob]
+
+  "Get the size of table cronjob"
+  getDeviceTableSize: Int
+}
+
+type Mutation {
+  persistCronjob(input: CronjobPersistInput): Cronjob
+  updateCronjob(input: CronjobUpdateInput): Cronjob
+}

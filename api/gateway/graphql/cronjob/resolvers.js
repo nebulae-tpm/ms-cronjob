@@ -35,18 +35,30 @@ module.exports = {
           500
         )
         .toPromise();
-    }
+    },
   },
   Mutation: {
-    persistCronjob(root, args, context) {
+    persistCronjob(root, args, context) {     
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',
-          'gateway.graphql.mutation.getCronjobTableSize',
+          'gateway.graphql.mutation.persistCronjob',
+          { root, args, jwt: context.encodedToken },
+          500
+        )
+        .toPromise();
+    },
+    updateCronjob(root, args, context) {     
+      return context.broker
+        .forwardAndGetReply$(
+          'Cronjob',
+          'gateway.graphql.mutation.updateCronjob',
           { root, args, jwt: context.encodedToken },
           500
         )
         .toPromise();
     }
+
+
   }
 };
