@@ -122,7 +122,6 @@ class CronjobManager {
     cronjob.id = uuidv4();
     cronjob.version = 1;
     cronjob.active = true;
-    if (cronjob.body) {
       return Rx.Observable.of(cronjob)
         .mergeMap(value => this.buildJobVsScheduleJobElement$(value))
         .mergeMap(jobVsScheduleJobElement => {
@@ -139,7 +138,7 @@ class CronjobManager {
             })
           );
         });
-    }
+    
   }
 
   /*
