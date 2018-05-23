@@ -1,0 +1,38 @@
+<div fxLayout="column" fxFlex="100" fxFlex.gt-sm="48" fxFlex.gt-md="48">
+  <div class="content">
+    <form name="cronjobForm" [formGroup]="cronjobForm" class="cronjob w-100-p" fxLayout="column" fxFlex>
+
+      <mat-tab-group>
+
+        <mat-tab label="{{'CRONJOB.CRONJOB_DETAIL' | translate}}">
+          <div class="tab-content p-24" fusePerfectScrollbar>
+
+            <mat-form-field class="w-100-p">
+              <input matInput name="name" formControlName="name" placeholder="{{'CRONJOB.NAME' | translate}}" required>
+            </mat-form-field>
+
+            <mat-form-field class="w-100-p">
+              <input matInput name="eventType" formControlName="eventType" placeholder="{{'CRONJOB.EVENT_TYPE' | translate}}" required>
+            </mat-form-field>
+
+            <mat-form-field class="w-100-p">
+              <input matInput name="cronjobFormat" formControlName="cronjobFormat" placeholder="{{'CRONJOB.CRONJOB_FORMAT' | translate}}"
+                required>
+            </mat-form-field>
+
+            <mat-form-field class="w-100-p">
+              <input matInput name="active" formControlName="active" placeholder="{{'CRONJOB.ACTIVE' | translate}}" required>
+            </mat-form-field>
+
+            <mat-form-field class="w-100-p">
+              <textarea matInput name="body" formControlName="body" placeholder="{{'CRONJOB.BODY' | translate}}" rows="5">
+                          </textarea>
+            </mat-form-field>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </form>
+
+  </div>
+</div>
