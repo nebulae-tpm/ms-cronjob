@@ -26,7 +26,7 @@ module.exports = {
         )
         .toPromise();
     },
-    getDeviceTableSize(root, args, context) {
+    getCronjobTableSize(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',

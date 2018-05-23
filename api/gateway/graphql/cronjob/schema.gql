@@ -65,7 +65,7 @@ type Query {
   getCronjobs(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [Cronjob]
 
   "Get the size of table cronjob"
-  getDeviceTableSize: Int
+  getCronjobTableSize: Int
 }
 
 type Mutation {
