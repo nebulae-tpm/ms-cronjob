@@ -19,7 +19,7 @@ export class CronjobsService {
     private http: HttpClient,
     private gateway: GatewayService
   ) { }
-
+/*
   getDevices$(pageValue,countValue, filterText, sortColumn, sortOrder): Observable<any[]> {
     return this.gateway.apollo
       .query<any>({
@@ -34,6 +34,8 @@ export class CronjobsService {
       })
       .pipe(map(rawData => rawData.data.getDevices));
   }
+  */
+ /*
   getDeviceTableSize(): Observable<number> {
     return this.gateway.apollo
     .query<any>({
@@ -41,6 +43,7 @@ export class CronjobsService {
     })
     .pipe(map(rawData => rawData.data.getDeviceTableSize));
   }
+  */
 }
 
 

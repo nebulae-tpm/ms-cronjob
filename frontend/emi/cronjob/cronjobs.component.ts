@@ -63,6 +63,7 @@ export class CronjobsComponent implements OnInit {
   }
 
   ngOnInit() {
+/*
     this.refreshDataTable(
       this.page,
       this.count,
@@ -109,6 +110,7 @@ export class CronjobsComponent implements OnInit {
         this.tableSize = result;
       })
     );
+    */
   }
 
   ngDestroy() {
@@ -118,7 +120,7 @@ export class CronjobsComponent implements OnInit {
       });
     }
   }
-
+/*
   refreshDataTable(page, count, filter, sortColumn, sortOrder) {
     this.cronjobsService
       .getCronjobs$(page, count, filter, sortColumn, sortOrder)
@@ -127,4 +129,5 @@ export class CronjobsComponent implements OnInit {
         this.dataSource.data = model;
       });
   }
+  */
 }
