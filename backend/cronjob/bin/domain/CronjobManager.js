@@ -7,6 +7,7 @@ const eventSourcing = require('../tools/EventSourcing')();
 const schedule = require('node-schedule');
 const uuidv4 = require('uuid/v4');
 const ThrowCapturer = require('rxjs/observable/throw');
+const parser = require('cron-parser');
 
 let instance = null;
 
@@ -34,12 +35,10 @@ class CronjobManager {
   }
 
   buildJobVsScheduleJobElement$(cronjob) {
-    return Rx.Observable.of(cronjob).map(jobValue => {
-      if (jobValue.active) {
-        const scheduleJob = schedule.scheduleJob(
-          jobValue.cronjobFormat,
-          function() {
-            console.log('Se ejecuta: ', cronjob.name);
+    return Rx.Observable.of(cronjob)
+      .map(jobValue => {
+        if (jobValue.active) {
+          return schedule.scheduleJob(jobValue.cronjobFormat, function() {
             const body = jobValue.body ? JSON.parse(jobValue.body) : undefined;
             eventSourcing.eventStore
               .emitEvent$(
@@ -55,18 +54,15 @@ class CronjobManager {
                 })
               )
               .subscribe(result => {});
-          }
-        );
+          });
+        }
+      })
+      .map(scheduleJob => {
         return {
           scheduleJob: scheduleJob,
           cronjob: cronjob
         };
-      } else {
-        return {
-          cronjob: cronjob
-        };
-      }
-    });
+      });
   }
 
   removeCronjob$(cronjobToRemove) {
@@ -87,45 +83,80 @@ class CronjobManager {
   }
 
   updateCronjob$(cronjob) {
-    return Rx.Observable.of(cronjob)
-      .mergeMap(value => {
-        const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
-          job => job.cronjob.id == cronjob.id
-        )[0];
-        let newCronjob = cronjob;
-        if (oldJobVsScheduleJob) {
-          newCronjob = Object.assign(oldJobVsScheduleJob.cronjob, cronjob);
+    if (cronjob.body && !this.validateCronjobBody(cronjob.body)) {
+      return Rx.Observable.of({ code: 20001, message: 'Invalid body format' });
+    }
+    if (!cronjob.cronjobFormat.trim() || !this.validateCronjobFormat(cronjob.cronjobFormat)) {
+      return Rx.Observable.of({
+        code: 20002,
+        message: 'Invalid cronjob format'
+      });
+    } else {
+      const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
+        job => job.cronjob.id == cronjob.id
+      )[0];
+      return Rx.Observable.of(cronjob)
+        .map(job => {
+          return oldJobVsScheduleJob
+            ? Object.assign(oldJobVsScheduleJob.cronjob, job)
+            : job;
+        })
+        .do(job => {
           if (oldJobVsScheduleJob.scheduleJob) {
             oldJobVsScheduleJob.scheduleJob.cancel();
           }
-          this.jobVsScheduleJobList.pop(oldJobVsScheduleJob);
-        }
-        return this.buildJobVsScheduleJobElement$(newCronjob);
-      })
-      .mergeMap(newJobVsScheduleJob => {
-        this.jobVsScheduleJobList.push(newJobVsScheduleJob);
-        return eventSourcing.eventStore.emitEvent$(
-          new Event({
-            eventType: 'CronjobUpdated',
-            eventTypeVersion: 1,
-            aggregateType: 'Cronjob',
-            aggregateId: newJobVsScheduleJob.cronjob.id,
-            data: newJobVsScheduleJob.cronjob,
-            //TODO: aca se debe colocar el usuario que periste el cronjob
-            user: 'SYSTEM.Cronjob.cronjob'
-          })
-        );
-      });
+        })
+        .do(job => {
+          if (oldJobVsScheduleJob) {
+            this.jobVsScheduleJobList.pop(oldJobVsScheduleJob);
+          }
+        })
+        .mergeMap(newCronjob => {
+          return this.buildJobVsScheduleJobElement$(newCronjob);
+        })
+        .mergeMap(newJobVsScheduleJob => {
+          this.jobVsScheduleJobList.push(newJobVsScheduleJob);
+          return eventSourcing.eventStore.emitEvent$(
+            new Event({
+              eventType: 'CronjobUpdated',
+              eventTypeVersion: 1,
+              aggregateType: 'Cronjob',
+              aggregateId: newJobVsScheduleJob.cronjob.id,
+              data: newJobVsScheduleJob.cronjob,
+              //TODO: aca se debe colocar el usuario que periste el cronjob
+              user: 'SYSTEM.Cronjob.cronjob'
+            })
+          );
+        })
+        .map(result => {
+          return {
+            code: 200,
+            message: `Cronjob with id: ${cronjob.id} has been updated`
+          };
+        });
+    }
   }
 
   createCronjob$(cronjob) {
-    cronjob.id = uuidv4();
-    cronjob.version = 1;
-    cronjob.active = true;
+    if (cronjob.body && !this.validateCronjobBody(cronjob.body)) {
+      return Rx.Observable.of({ code: 20001, message: 'Invalid body format' });
+    }
+    if (!cronjob.cronjobFormat.trim() || !this.validateCronjobFormat(cronjob.cronjobFormat)) {
+      return Rx.Observable.of({
+        code: 20002,
+        message: 'Invalid cronjob format'
+      });
+    }
+    {
+      cronjob.id = uuidv4();
+      cronjob.version = 1;
+      cronjob.active = true;
       return Rx.Observable.of(cronjob)
-        .mergeMap(value => this.buildJobVsScheduleJobElement$(value))
+        .mergeMap(job => this.buildJobVsScheduleJobElement$(job))
+        .do(jobVsScheduleJobElement =>
+          this.jobVsScheduleJobList.push(jobVsScheduleJobElement)
+        )
         .mergeMap(jobVsScheduleJobElement => {
-          this.jobVsScheduleJobList.push(jobVsScheduleJobElement);
           return eventSourcing.eventStore.emitEvent$(
             new Event({
               eventType: 'CronjobCreated',
@@ -137,22 +168,38 @@ class CronjobManager {
               user: 'SYSTEM.Cronjob.cronjob'
             })
           );
+        })
+        .map(result => {
+          return {
+            code: 200,
+            message: `Cronjob with id: ${cronjob.id} has been created`
+          };
         });
-    
+    }
   }
 
-  /*
-  validateCronjobBody$(cronjob) {
+  validateCronjobBody(cronjob) {
     try {
       JSON.parse(cronjob.body);
     } catch (e) {
-      return Rx.Observable.throw(
-        new Error('Failed formating cronjob body to JsonObject')
-      );
+      return false;
     }
-    return Rx.Observable.of(cronjob);
+    return true;
   }
-  */
+
+  validateCronjobFormat(cronjob) {
+    try {
+    
+      var validation = parser.parseString(cronjob);
+      if (!Object.keys(validation.errors).length) {
+        return true;
+      }
+      throw 'Invalid CronjobFormat';
+    } catch (ex) {
+      console.log(ex);
+      return false;
+    }
+  }
 }
 
 module.exports = () => {

@@ -12,6 +12,15 @@ type Cronjob {
   body: String,
   "Cronjob version"
   version: Int,
+  "Cronjob status"
+  active: Boolean
+}
+
+type CommandResponse {
+  "Response code"
+  code: Int
+  "Response message"
+  message: String
 }
 
 input CronjobPersistInput {
@@ -60,6 +69,6 @@ type Query {
 }
 
 type Mutation {
-  persistCronjob(input: CronjobPersistInput): Cronjob
-  updateCronjob(input: CronjobUpdateInput): Cronjob
+  persistCronjob(input: CronjobPersistInput): CommandResponse
+  updateCronjob(input: CronjobUpdateInput): CommandResponse
 }

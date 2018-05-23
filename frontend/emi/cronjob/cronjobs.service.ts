@@ -15,4 +15,32 @@ import { Subscription } from 'rxjs';
 
 @Injectable()
 export class CronjobsService {
+  constructor(
+    private http: HttpClient,
+    private gateway: GatewayService
+  ) { }
+
+  getDevices$(pageValue,countValue, filterText, sortColumn, sortOrder): Observable<any[]> {
+    return this.gateway.apollo
+      .query<any>({
+        query: getCronjobs,
+        variables: {
+          page: pageValue,
+          count: countValue,
+          filterText: filterText,
+          sortColumn: sortColumn,
+          sortOrder: sortOrder
+        },
+      })
+      .pipe(map(rawData => rawData.data.getDevices));
+  }
+  getDeviceTableSize(): Observable<number> {
+    return this.gateway.apollo
+    .query<any>({
+      query: getDeviceTableSize
+    })
+    .pipe(map(rawData => rawData.data.getDeviceTableSize));
+  }
 }
+
+
