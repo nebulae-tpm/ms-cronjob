@@ -24,6 +24,12 @@ export const locale = {
       CREATE_CRONJOB_MESSAGE: "¿Esta seguro que desea crear la tarea programada?",
       EXECUTE_CRONJOB_TITLE: "Ejecutar tarea programada",
       EXECUTE_CRONJOB_MESSAGE: "¿Esta seguro que desea ejecutar la tarea programada?",
+      BODY_INVALID: "Parametros inválidos",
+      INVALID_CRON_FORMAT: "Formato inválido",
+      NAME_IS: "Nombre es",
+      EVENT_TYPE_IS: "Tipo de evento es",
+      CRONJOB_FORMAT_IS: "Formato es",
+      REQUIRED: "Requerido"
     }
   }
 };
