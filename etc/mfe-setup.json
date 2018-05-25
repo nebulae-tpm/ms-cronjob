@@ -28,7 +28,9 @@
         "priority": 100000
       }
     ],
-    "preBuildCommands": [],
+    "preBuildCommands": [
+      "npm i cron-parser"
+    ],
     "environmentVars": {
       "default": {
         "production": false
