@@ -29,7 +29,7 @@ export const locale = {
       NAME_IS: "name is",
       EVENT_TYPE_IS: "Event type is",
       CRONJOB_FORMAT_IS: "Cron format is",
-      REQUIRED: "Requerido"
+      REQUIRED: "Required"
     }
   }
 };

@@ -9,11 +9,13 @@ import { parseString } from 'cron-parser';
 export class CustomValidators {
   static cronjobFormatValidate(cronjobFormat: FormControl): ValidationErrors {
     try {
+      console.log('keys: ', parseString(cronjobFormat.value).errors);
       if (!Object.keys(parseString(cronjobFormat.value).errors).length) {
         return null;
       }
       throw 'Invalid CronjobFormat';
     } catch (ex) {
+      console.log('excepcion en format: ', ex);
       return {
         cronjobFormatValidate: true
       };
