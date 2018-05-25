@@ -71,9 +71,7 @@ export class CronjobDetailComponent implements OnInit {
     return this.formBuilder.group({
       name: new FormControl(),
       eventType: new FormControl(),
-      cronjobFormat: new FormControl('', [
-        CustomValidators.cronjobFormatValidate
-      ]),
+      cronjobFormat: new FormControl('', [Validators.pattern(/((\*\/\d{1,2}|\*|\d{1,2})\ ){1,5}(\*\/\d{1,2}|\*|\d{1,2})/)]),
       active: new FormControl(),
       body: new FormControl('', [CustomValidators.bodyFormatValidate])
     });

@@ -33,7 +33,7 @@
               <mat-error *ngIf="cronjobForm.hasError('required', 'cronjobFormat')">
                 {{'CRONJOB.CRONJOB_FORMAT_IS' | translate}} <strong>{{'CRONJOB.REQUIRED' | translate}}</strong>
               </mat-error>
-            <mat-error *ngIf="this.cronjobForm.controls['cronjobFormat'].errors?.cronjobFormatValidate">
+            <mat-error *ngIf="cronjobForm.hasError('pattern', 'cronjobFormat')">
               {{'CRONJOB.INVALID_CRON_FORMAT' | translate}}
             </mat-error>
           </mat-form-field>
