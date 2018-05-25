@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { range } from 'rxjs/observable/range';
 import { map, toArray } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
-import { getCronjobs, getCronjobTableSize} from '../gql/Cronjobs';
+import { getCronjobs, getCronjobTableSize, executeCronjob} from '../gql/Cronjobs';
 import { Subscription } from 'rxjs';
 
 @Injectable()
@@ -21,9 +21,6 @@ export class CronjobsService {
   ) { }
 
   getCronjobs$(pageValue, countValue, filterText, sortColumn, sortOrder): Observable<any[]> {
-    console.log('Page: ', pageValue);
-    console.log('countValue: ', countValue);
-    console.log('getCronjobs: ', getCronjobs);
     return this.gateway.apollo
       .query<any>({
         query: getCronjobs,
@@ -34,6 +31,7 @@ export class CronjobsService {
           sortColumn: sortColumn,
           sortOrder: sortOrder
         },
+        fetchPolicy: "network-only"
       })
       .pipe(map(rawData => rawData.data.getCronjobs));
   }
@@ -45,6 +43,17 @@ export class CronjobsService {
       query: getCronjobTableSize
     })
     .pipe(map(rawData => rawData.data.getCronjobTableSize));
+  }
+
+  executeCronjob$(cronjobId): Observable<number> {
+    return this.gateway.apollo
+    .mutate<any>({
+      mutation: executeCronjob,
+      variables: {
+        cronjobId
+      }
+    })
+    .pipe(map(rawData => rawData.data.executeCronjob));
   }
 
 }

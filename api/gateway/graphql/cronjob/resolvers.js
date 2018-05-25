@@ -57,8 +57,26 @@ module.exports = {
           500
         )
         .toPromise();
+    },
+    removeCronjob(root, args, context) {     
+      return context.broker
+        .forwardAndGetReply$(
+          'Cronjob',
+          'gateway.graphql.mutation.removeCronjob',
+          { root, args, jwt: context.encodedToken },
+          500
+        )
+        .toPromise();
+    },
+    executeCronjob(root, args, context) {     
+      return context.broker
+        .forwardAndGetReply$(
+          'Cronjob',
+          'gateway.graphql.mutation.executeCronjob',
+          { root, args, jwt: context.encodedToken },
+          500
+        )
+        .toPromise();
     }
-
-
   }
 };

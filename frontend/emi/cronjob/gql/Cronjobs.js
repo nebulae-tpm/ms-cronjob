@@ -19,3 +19,12 @@ export const getCronjobTableSize = gql`
     getCronjobTableSize
   }
 `;
+
+export const executeCronjob = gql`
+  mutation executeCronjob($cronjobId: String) {
+    executeCronjob(cronjobId: $cronjobId) {
+      code
+      message
+    }
+  }
+`;

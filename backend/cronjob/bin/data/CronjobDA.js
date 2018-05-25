@@ -25,11 +25,23 @@ class CronjobDA {
     let filterObject = {};
     const orderObject = {};
     if (filter && filter != '') {
-      //TODO: Se debe agregar los filtros que se desea utilizar
+      filterObject = {
+        $or: [
+          { 'name': { $regex: `${filter}.*`, $options: 'i' } },
+          { 'eventType': { $regex: `${filter}.*`, $options: 'i' } }
+        ]
+      };
     }
     if (sortColumn && order) {
       let column;
-      //TODO: se deben agregar las columnas por las que se desea ordenar los datos en la vista
+      switch (sortColumn) {
+        case 'name':
+          column = 'name';
+          break;
+        case 'eventType':
+          column = 'eventType';
+          break;
+      }
       orderObject[column] = order == 'asc' ? 1 : -1;
     }
     const collection = mongoDB.db.collection('Cronjobs');
@@ -51,15 +63,15 @@ class CronjobDA {
       const cursor = collection.find({});
       let obj = await this.extractNextFromMongoCursor(cursor);
       while (obj) {
-          observer.next(obj);
-          obj = await this.extractNextFromMongoCursor(cursor);
+        observer.next(obj);
+        obj = await this.extractNextFromMongoCursor(cursor);
       }
-      
+
       observer.complete();
-  });
+    });
   }
 
-   /**
+  /**
    * Extracts the next value from a mongo cursos if available, returns undefined otherwise
    * @param {*} cursor
    */
@@ -102,7 +114,7 @@ class CronjobDA {
     return Rx.Observable.of(cronjob).mergeMap(result => {
       return Rx.Observable.fromPromise(
         collection.updateOne(
-          { name: cronjob.name },
+          { id: cronjob.id },
           {
             $set: cronjob,
             $inc: { version: 1 }
@@ -111,6 +123,15 @@ class CronjobDA {
       ).map(result => {
         return JSON.stringify(result);
       });
+    });
+  }
+
+  static removeCronjob$(cronjobId) {
+    const collection = mongoDB.db.collection('Cronjobs');
+    return Rx.Observable.fromPromise(
+      collection.deleteOne({ id: cronjobId })
+    ).map(result => {
+      return JSON.stringify(result);
     });
   }
 }

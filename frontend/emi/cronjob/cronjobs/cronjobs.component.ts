@@ -12,10 +12,13 @@ import {
   MatPaginator,
   MatSort,
   MatTableDataSource,
-  Sort
+  Sort,
+  MatDialog,
+  MatSnackBar
 } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { CronjobsService } from './cronjobs.service';
+import { CronjobDetailService } from '../cronjob-detail/cronjob-detail.service';
 import { FuseUtils } from '../../../../core/fuseUtils';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
@@ -25,8 +28,9 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
-import { map, first } from 'rxjs/operators';
+import { map, first, filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
+import { ExecuteCronjobDialogComponent } from './execute-cronjob-dialog/execute-cronjob-dialog.component';
 
 @Component({
   selector: 'cronjob',
@@ -41,16 +45,19 @@ export class CronjobsComponent implements OnInit {
     'eventType',
     'cronjobFormat',
     'version',
-    'active'
+    'active',
+    'execute'
   ];
 
   tableSize: number;
+  selectedCronjob: any;
   subscriptions = [];
   page = 0;
   count = 10;
   filterText = '';
   sortColumn = null;
   sortOrder = null;
+  cronjobDetailAction = "";
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: ElementRef;
@@ -58,7 +65,10 @@ export class CronjobsComponent implements OnInit {
 
   constructor(
     private translationLoader: FuseTranslationLoaderService,
-    private cronjobsService: CronjobsService
+    private cronjobsService: CronjobsService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private cronjobDetailService: CronjobDetailService
   ) {
     this.translationLoader.loadTranslations(english, spanish);
   }
@@ -71,6 +81,18 @@ export class CronjobsComponent implements OnInit {
       this.sortColumn,
       this.sortOrder
     );
+    this.cronjobDetailService.closeDetail$.forEach(evt => {
+      this.selectedCronjob = undefined;
+    });
+    this.cronjobDetailService.refreshTable$.forEach(evt => {
+      this.refreshDataTable(
+        this.page,
+        this.count,
+        this.filterText,
+        this.sortColumn,
+        this.sortOrder
+      );
+    });
     this.subscriptions.push(
       Observable.fromEvent(this.filter.nativeElement, 'keyup')
         .debounceTime(150)
@@ -110,7 +132,28 @@ export class CronjobsComponent implements OnInit {
         this.tableSize = result;
       })
     );
+  }
 
+  executeCronjob(cronjobId) {
+    this.dialog
+    .open(ExecuteCronjobDialogComponent)
+    .afterClosed()
+    .pipe(filter(executeCronjob => executeCronjob))
+      .mergeMap(executeCronjob => {
+        if (executeCronjob) {
+          return this.cronjobsService
+            .executeCronjob$(cronjobId)
+            .pipe(first())
+        }
+        else { Observable.of(undefined)}
+      })
+      .subscribe(result => {
+        if (result) {
+          this.snackBar.open('Tarea programada ha sido ejecutada manualmente', 'Cerrar', {
+            duration: 2000
+          });
+        }
+    })
   }
 
   ngDestroy() {
@@ -119,6 +162,15 @@ export class CronjobsComponent implements OnInit {
         sub.unsubscribe();
       });
     }
+  }
+
+  selectRow(row) {
+    this.cronjobDetailAction = "EDIT";
+    this.selectedCronjob = row;
+  }
+  addNewCronjob() {
+    this.cronjobDetailAction = "ADD";
+    this.selectedCronjob = {};
   }
 
   refreshDataTable(page, count, filter, sortColumn, sortOrder) {

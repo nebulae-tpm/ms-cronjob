@@ -24,6 +24,12 @@ class Cronjobs {
   updateCronjob({ root, args, jwt }, authToken) {
     return cronjobManager.updateCronjob$(args.input);
   }
+  removeCronjob({ root, args, jwt }, authToken) {
+    return cronjobManager.removeCronjob$(args.cronjobId);
+  }
+  executeCronjob({ root, args, jwt }, authToken) {
+    return cronjobManager.executeCronjob$(args.cronjobId);
+  }
 }
 
 module.exports = Cronjobs;

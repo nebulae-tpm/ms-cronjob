@@ -19,8 +19,10 @@ class GraphQlService {
       'gateway.graphql.query.getCronjobDetail': this.cronjobs.getCronjobDetail,
       'gateway.graphql.query.getCronjobs': this.cronjobs.getCronjobs,
       'gateway.graphql.query.getCronjobTableSize': this.cronjobs.getCronjobTableSize,
+      'gateway.graphql.mutation.executeCronjob': this.cronjobs.executeCronjob,
       'gateway.graphql.mutation.persistCronjob': this.cronjobs.persistCronjob,
-      'gateway.graphql.mutation.updateCronjob': this.cronjobs.updateCronjob
+      'gateway.graphql.mutation.updateCronjob': this.cronjobs.updateCronjob,
+      'gateway.graphql.mutation.removeCronjob': this.cronjobs.removeCronjob
     };
   }
 

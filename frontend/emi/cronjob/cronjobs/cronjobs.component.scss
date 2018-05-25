@@ -32,7 +32,7 @@
     }
   }
 
-  .device-table {
+  .cronjob-table {
     flex: 1 1 auto;
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     overflow: auto;
@@ -74,10 +74,9 @@
     .quantity-indicator {
       display: inline-block;
       vertical-align: middle;
-      width: 8px;
-      height: 8px;
-      border-radius: 4px;
-      margin-right: 8px;
+      width: 18px;
+      height:18px;
+      border-radius: 9px;
 
       & + span {
         display: inline-block;
@@ -93,4 +92,8 @@
 
 .search-input-wrapper {
   max-width: 480px;
+}
+
+.highlight{
+  background: #B9BBB9;
 }

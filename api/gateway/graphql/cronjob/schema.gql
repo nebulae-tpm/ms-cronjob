@@ -32,6 +32,8 @@ input CronjobPersistInput {
   cronjobFormat: String!
   "Parameters of cronjob"
   body: String
+  "Cronjob status"
+  active: Boolean
 }
 
 input CronjobUpdateInput {
@@ -59,7 +61,7 @@ type Parameter {
 
 type Query {
   "Get Cronjob filtered by the device id"
-  getCronjobDetail(id: ID!): Cronjob
+  getCronjobDetail(id: String!): Cronjob
 
   "Get all cronjobs"
   getCronjobs(page: Int!, count: Int!, filter: String, sortColumn: String, sortOrder: String): [Cronjob]
@@ -71,4 +73,6 @@ type Query {
 type Mutation {
   persistCronjob(input: CronjobPersistInput): CommandResponse
   updateCronjob(input: CronjobUpdateInput): CommandResponse
+  removeCronjob(cronjobId: String): CommandResponse
+  executeCronjob(cronjobId: String): CommandResponse
 }

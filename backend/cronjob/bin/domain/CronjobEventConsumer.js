@@ -20,6 +20,9 @@ class CronjobEventConsumer {
         delete cronjob._id;
         return CronjobDA.updateCronjob$(cronjob);
     }
+    handleCronjobRemoved$(event) {  
+        return CronjobDA.removeCronjob$(event.data);
+    }
 
 }
 

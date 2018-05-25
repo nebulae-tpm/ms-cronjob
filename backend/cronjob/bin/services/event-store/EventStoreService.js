@@ -32,7 +32,8 @@ class EventStoreService {
         }
         return Rx.Observable.from([
             { aggregateType: 'Cronjob', eventType: 'CronjobCreated', onErrorHandler, onCompleteHandler },
-            { aggregateType: 'Cronjob', eventType: 'CronjobUpdated', onErrorHandler, onCompleteHandler }            
+            { aggregateType: 'Cronjob', eventType: 'CronjobUpdated', onErrorHandler, onCompleteHandler },            
+            { aggregateType: 'Cronjob', eventType: 'CronjobRemoved', onErrorHandler, onCompleteHandler }            
         ]).map(params => { 
             return this.subscribeEventHandler(params)
         });
@@ -76,6 +77,7 @@ class EventStoreService {
         return {
             'CronjobCreated': { fn: cronjobEventConsumer.handleCronjobCreated$, obj: cronjobEventConsumer },
             'CronjobUpdated': { fn: cronjobEventConsumer.handleCronjobUpdated$, obj: cronjobEventConsumer },
+            'CronjobRemoved': { fn: cronjobEventConsumer.handleCronjobRemoved$, obj: cronjobEventConsumer },
         };
     }
 
