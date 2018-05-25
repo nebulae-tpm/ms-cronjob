@@ -112,7 +112,7 @@ export class CronjobDetailComponent implements OnInit {
               this.snackBar.open('Tarea programada ha sido creada', 'Cerrar', {
                 duration: 2000
               });
-              this.selectedCronjob = {};
+              this.cronjobDetailService.executeCloseDetail();
             });
         }
       });
