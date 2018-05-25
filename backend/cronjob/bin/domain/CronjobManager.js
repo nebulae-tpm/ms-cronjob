@@ -101,7 +101,7 @@ class CronjobManager {
         )[0];
       })
       .do(job => {
-        if (job.scheduleJob) {
+        if (job && job.scheduleJob) {
           job.scheduleJob.cancel();
         }
       })
