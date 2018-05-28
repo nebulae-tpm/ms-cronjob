@@ -57,7 +57,8 @@ export class CronjobsComponent implements OnInit {
   filterText = '';
   sortColumn = null;
   sortOrder = null;
-  cronjobDetailAction = "";
+  cronjobDetailAction = '';
+  itemPerPage = "";
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: ElementRef;
@@ -132,28 +133,33 @@ export class CronjobsComponent implements OnInit {
         this.tableSize = result;
       })
     );
+
   }
+
 
   executeCronjob(cronjobId) {
     this.dialog
-    .open(ExecuteCronjobDialogComponent)
-    .afterClosed()
-    .pipe(filter(executeCronjob => executeCronjob))
+      .open(ExecuteCronjobDialogComponent)
+      .afterClosed()
+      .pipe(filter(executeCronjob => executeCronjob))
       .mergeMap(executeCronjob => {
         if (executeCronjob) {
-          return this.cronjobsService
-            .executeCronjob$(cronjobId)
-            .pipe(first())
+          return this.cronjobsService.executeCronjob$(cronjobId).pipe(first());
+        } else {
+          Observable.of(undefined);
         }
-        else { Observable.of(undefined)}
       })
       .subscribe(result => {
         if (result) {
-          this.snackBar.open('Tarea programada ha sido ejecutada manualmente', 'Cerrar', {
-            duration: 2000
-          });
+          this.snackBar.open(
+            'Tarea programada ha sido ejecutada manualmente',
+            'Cerrar',
+            {
+              duration: 2000
+            }
+          );
         }
-    })
+      });
   }
 
   ngDestroy() {
@@ -165,11 +171,11 @@ export class CronjobsComponent implements OnInit {
   }
 
   selectRow(row) {
-    this.cronjobDetailAction = "EDIT";
+    this.cronjobDetailAction = 'EDIT';
     this.selectedCronjob = row;
   }
   addNewCronjob() {
-    this.cronjobDetailAction = "ADD";
+    this.cronjobDetailAction = 'ADD';
     this.selectedCronjob = {};
   }
 

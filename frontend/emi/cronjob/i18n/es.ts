@@ -29,7 +29,9 @@ export const locale = {
       NAME_IS: "Nombre es",
       EVENT_TYPE_IS: "Tipo de evento es",
       CRONJOB_FORMAT_IS: "Formato es",
-      REQUIRED: "Requerido"
+      REQUIRED: "Requerido",
+      ITEMS_PER_PAGE: "Items por pagina",
+      OF: "de"
     }
   }
 };
