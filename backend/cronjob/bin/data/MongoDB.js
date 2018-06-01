@@ -28,6 +28,37 @@ class MongoDB {
       }
     );
   }
+
+  /**
+   * Stops DB connections
+   * Returns an Obserable that resolve to a string log
+   */
+  stop$() {
+    return Rx.Observable.create((observer) => {
+      this.client.close();
+      observer.next('Mongo DB Client closed');
+      observer.complete();
+    });
+  }
+
+
+  /**
+    * Ensure Index creation
+    * Returns an Obserable that resolve to a string log
+    */
+  createIndexes$() {
+    return Rx.Observable.create(async (observer) => {
+
+      observer.next('Creating index for Cronjob.Cronjobs => ({ name: 1 })  ');
+      await this.db.collection('Cronjobs').createIndex({ "name": 1 });
+
+      observer.next('Creating index for Cronjob.Cronjobs => ({ id: 1 })  ');
+      await this.db.collection('Cronjobs').createIndex({ "id": 1 });
+      
+      observer.next('All indexes created');
+      observer.complete();
+    });
+  }
 }
 
 module.exports = () => {
