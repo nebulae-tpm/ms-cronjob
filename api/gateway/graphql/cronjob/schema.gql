@@ -76,3 +76,6 @@ type Mutation {
   removeCronjob(cronjobId: String): CommandResponse
   executeCronjob(cronjobId: String): CommandResponse
 }
+type Subscription {
+  CronjobRegistersUpdated: Boolean
+}

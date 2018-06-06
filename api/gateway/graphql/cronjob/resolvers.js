@@ -15,7 +15,7 @@ module.exports = {
           500
         )
         .toPromise();
-    },    
+    },
     getCronjobs(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
@@ -35,10 +35,10 @@ module.exports = {
           500
         )
         .toPromise();
-    },
+    }
   },
   Mutation: {
-    persistCronjob(root, args, context) {     
+    persistCronjob(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',
@@ -48,7 +48,7 @@ module.exports = {
         )
         .toPromise();
     },
-    updateCronjob(root, args, context) {     
+    updateCronjob(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',
@@ -58,7 +58,7 @@ module.exports = {
         )
         .toPromise();
     },
-    removeCronjob(root, args, context) {     
+    removeCronjob(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',
@@ -68,7 +68,7 @@ module.exports = {
         )
         .toPromise();
     },
-    executeCronjob(root, args, context) {     
+    executeCronjob(root, args, context) {
       return context.broker
         .forwardAndGetReply$(
           'Cronjob',
@@ -78,5 +78,28 @@ module.exports = {
         )
         .toPromise();
     }
+  },
+  Subscription: {
+    CronjobRegistersUpdated: {
+      subscribe: withFilter(
+        (payload, variables, context, info) => {
+          return pubsub.asyncIterator('CronjobRegistersUpdated');
+        },
+        (payload, variables, context, info) => {
+          return true;
+        }
+      )
+    }
   }
 };
+
+broker.getMaterializedViewsUpdates$(['CronjobRegistersUpdated']).subscribe(
+  evt => {
+    console.log('Se escucha evento: ', evt);
+    pubsub.publish('CronjobRegistersUpdated', {
+      CronjobRegistersUpdated: evt.data
+    });
+  },
+  error => console.error('Error listening CronjobRegistersUpdated', error),
+  () => console.log('CronjobRegistersUpdated listener STOPPED')
+);

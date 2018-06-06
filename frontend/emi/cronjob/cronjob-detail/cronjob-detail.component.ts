@@ -88,7 +88,6 @@ export class CronjobDetailComponent implements OnInit {
             .updateCronjobDetail$(this.selectedCronjob)
             .pipe(first())
             .subscribe(model => {
-              this.cronjobDetailService.executeRefreshTable();
               this.snackBar.open('Tarea programada ha sido editada', 'Cerrar', {
                 duration: 2000
               });
@@ -108,7 +107,6 @@ export class CronjobDetailComponent implements OnInit {
             .createCronjobDetail$(this.selectedCronjob)
             .pipe(first())
             .subscribe(model => {
-              this.cronjobDetailService.executeRefreshTable();
               this.snackBar.open('Tarea programada ha sido creada', 'Cerrar', {
                 duration: 2000
               });
@@ -129,7 +127,6 @@ export class CronjobDetailComponent implements OnInit {
             .removeCronjobDetail$(this.selectedCronjob.id)
             .pipe(first())
             .subscribe(model => {
-              this.cronjobDetailService.executeRefreshTable();
               this.snackBar.open('Tarea programada ha sido eliminada', 'Cerrar', {
                 duration: 2000
               });

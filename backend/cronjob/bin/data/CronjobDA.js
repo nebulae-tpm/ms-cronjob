@@ -27,8 +27,8 @@ class CronjobDA {
     if (filter && filter != '') {
       filterObject = {
         $or: [
-          { 'name': { $regex: `${filter}.*`, $options: 'i' } },
-          { 'eventType': { $regex: `${filter}.*`, $options: 'i' } }
+          { name: { $regex: `${filter}.*`, $options: 'i' } },
+          { eventType: { $regex: `${filter}.*`, $options: 'i' } }
         ]
       };
     }
@@ -100,10 +100,9 @@ class CronjobDA {
   static persistCronjob$(cronjob) {
     const collection = mongoDB.db.collection('Cronjobs');
     return Rx.Observable.of(cronjob).mergeMap(result => {
-      return Rx.Observable.fromPromise(collection.insertOne(cronjob)).map(
-        result => {
-          return JSON.stringify(result);
-        }
+      return Rx.Observable.fromPromise(collection.insertOne(cronjob)).mergeMap(
+        result =>
+          broker.send$(MATERIALIZED_VIEW_TOPIC, `CronjobRegistersUpdated`, true)
       );
     });
   }
@@ -120,9 +119,10 @@ class CronjobDA {
             $inc: { version: 1 }
           }
         )
-      ).map(result => {
-        return JSON.stringify(result);
-      });
+      ).mergeMap(
+        result =>
+          broker.send$(MATERIALIZED_VIEW_TOPIC, `CronjobRegistersUpdated`, true)
+      );
     });
   }
 
@@ -130,11 +130,11 @@ class CronjobDA {
     const collection = mongoDB.db.collection('Cronjobs');
     return Rx.Observable.fromPromise(
       collection.deleteOne({ id: cronjobId })
-    ).map(result => {
-      return JSON.stringify(result);
-    });
+    ).mergeMap(
+      result =>
+        broker.send$(MATERIALIZED_VIEW_TOPIC, `CronjobRegistersUpdated`, true)
+    );
   }
 }
-
 
 module.exports = CronjobDA;

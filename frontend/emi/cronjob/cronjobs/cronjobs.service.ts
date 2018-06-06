@@ -12,6 +12,7 @@ import { map, toArray } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import { getCronjobs, getCronjobTableSize, executeCronjob} from '../gql/Cronjobs';
 import { Subscription } from 'rxjs';
+import gql from 'graphql-tag';
 
 @Injectable()
 export class CronjobsService {
@@ -43,6 +44,16 @@ export class CronjobsService {
       query: getCronjobTableSize
     })
     .pipe(map(rawData => rawData.data.getCronjobTableSize));
+  }
+
+  subscribeToDeviceVolumesStateReportedEvent$(): Observable<any> {
+    return this.gateway.apollo.subscribe({
+      query: gql`
+        subscription {
+          CronjobRegistersUpdated
+        }
+      `
+    });
   }
 
   executeCronjob$(cronjobId): Observable<number> {

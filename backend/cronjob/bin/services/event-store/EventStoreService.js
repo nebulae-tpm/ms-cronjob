@@ -67,7 +67,7 @@ class EventStoreService {
       eventSourcing.eventStore
         .ensureAcknowledgeRegistry$(aggregateType)
         .mergeMap(() =>
-          eventSourcing.eventStore.getEventListener$(aggregateType, mbeKey)
+          eventSourcing.eventStore.getEventListener$(aggregateType, mbeKey,false)
         )
         .filter(evt => evt.et === eventType)
         .mergeMap(evt =>

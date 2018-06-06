@@ -145,7 +145,6 @@ class CronjobManager {
         message: 'Invalid cronjob format'
       });
     } else {
-      console.log('pasa validaciones');
       const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
         job => job.cronjob.id == cronjob.id
       )[0];

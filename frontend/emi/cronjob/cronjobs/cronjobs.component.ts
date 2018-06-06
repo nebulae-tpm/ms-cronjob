@@ -82,17 +82,21 @@ export class CronjobsComponent implements OnInit {
       this.sortColumn,
       this.sortOrder
     );
+    this.subscriptions.push(
+      this.cronjobsService
+        .subscribeToDeviceVolumesStateReportedEvent$()
+        .subscribe(result => {
+          this.refreshDataTable(
+            this.page,
+            this.count,
+            this.filterText,
+            this.sortColumn,
+            this.sortOrder
+          );
+        })
+    );
     this.cronjobDetailService.closeDetail$.forEach(evt => {
       this.selectedCronjob = undefined;
-    });
-    this.cronjobDetailService.refreshTable$.forEach(evt => {
-      this.refreshDataTable(
-        this.page,
-        this.count,
-        this.filterText,
-        this.sortColumn,
-        this.sortOrder
-      );
     });
     this.subscriptions.push(
       Observable.fromEvent(this.filter.nativeElement, 'keyup')
