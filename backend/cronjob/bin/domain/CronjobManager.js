@@ -146,7 +146,13 @@ class CronjobManager {
       });
     } else {
       const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
-        job => job.cronjob.id == cronjob.id
+        job => {
+          console.log(`Job updated: new= ${cronjob.name} old: ${job.cronjob.name}`)
+          console.log('Old job: ',job.cronjob.id);
+            console.log('New job: ',cronjob.id);
+            console.log('Is equals: ',(job.cronjob.id == cronjob.id));
+            return job.cronjob.id == cronjob.id
+        }
       )[0];
       return Rx.Observable.of(cronjob)
         .map(job => {
