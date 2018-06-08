@@ -40,6 +40,11 @@ class CronjobManager {
         if (jobValue.active) {
           return schedule.scheduleJob(jobValue.cronjobFormat, function() {
             const body = jobValue.body ? JSON.parse(jobValue.body) : undefined;
+            
+            if (cronjob.name === 'CleanGroupNamesJobTriggered') {
+              console.log('Se ejecuta: ', cronjob.name);
+            }
+            
             eventSourcing.eventStore
               .emitEvent$(
                 new Event({
@@ -107,7 +112,7 @@ class CronjobManager {
       })
       .do(job => {
         if (job) {
-          this.jobVsScheduleJobList.pop(job);
+          this.jobVsScheduleJobList.pull(job);
         }
       })
       .mergeMap(job => {
@@ -146,13 +151,7 @@ class CronjobManager {
       });
     } else {
       const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
-        job => {
-          console.log(`Job updated: new= ${cronjob.name} old: ${job.cronjob.name}`)
-          console.log('Old job: ',job.cronjob.id);
-            console.log('New job: ',cronjob.id);
-            console.log('Is equals: ',(job.cronjob.id == cronjob.id));
-            return job.cronjob.id == cronjob.id
-        }
+        job => job.cronjob.id == cronjob.id
       )[0];
       return Rx.Observable.of(cronjob)
         .map(job => {
@@ -160,18 +159,17 @@ class CronjobManager {
             ? Object.assign(oldJobVsScheduleJob.cronjob, job)
             : job;
         })
-        .do(job => {
-          if (oldJobVsScheduleJob.scheduleJob) {
-            oldJobVsScheduleJob.scheduleJob.cancel();
-          }
-        })
-        .do(job => {
-          if (oldJobVsScheduleJob) {
-            this.jobVsScheduleJobList.pop(oldJobVsScheduleJob);
-          }
-        })
-        .mergeMap(newCronjob => {
-          return this.buildJobVsScheduleJobElement$(newCronjob);
+        .mergeMap(job => {
+          return Rx.Observable.defer(() => {
+            if (oldJobVsScheduleJob.scheduleJob) {
+              oldJobVsScheduleJob.scheduleJob.cancel();
+            }
+            var index = this.jobVsScheduleJobList.indexOf(oldJobVsScheduleJob);
+            if (index > -1) {
+              this.jobVsScheduleJobList.splice(index,1);
+            }
+            return this.buildJobVsScheduleJobElement$(job);
+          });
         })
         .mergeMap(newJobVsScheduleJob => {
           this.jobVsScheduleJobList.push(newJobVsScheduleJob);
