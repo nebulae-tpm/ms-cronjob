@@ -6,18 +6,14 @@ import {
 } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { range } from 'rxjs/observable/range';
-import { map, toArray } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
 import { getCronjobs, getCronjobTableSize, executeCronjob} from '../gql/Cronjobs';
-import { Subscription } from 'rxjs';
 import gql from 'graphql-tag';
 
 @Injectable()
 export class CronjobsService {
   constructor(
-    private http: HttpClient,
     private gateway: GatewayService
   ) { }
 

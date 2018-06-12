@@ -6,19 +6,19 @@ import {
 } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { range } from 'rxjs/observable/range';
 import { map, toArray } from 'rxjs/operators';
 import { GatewayService } from '../../../../api/gateway.service';
-import { getCronjobDetail, updateCronjob, persistCronjob, removeCronjob } from '../gql/CronjobDetail';
+import {
+  getCronjobDetail,
+  updateCronjob,
+  persistCronjob,
+  removeCronjob
+} from '../gql/CronjobDetail';
 import { Subscription, Subject } from 'rxjs';
 
 @Injectable()
 export class CronjobDetailService {
-  constructor(
-    private http: HttpClient,
-    private gateway: GatewayService
-  ) { }
+  constructor(private http: HttpClient, private gateway: GatewayService) {}
   private _subject = new Subject<any>();
   private _subjectRefreshTable = new Subject<any>();
 
@@ -44,7 +44,7 @@ export class CronjobDetailService {
         query: getCronjobDetail,
         variables: {
           id
-        },
+        }
       })
       .pipe(map(rawData => rawData.data.getCronjobDetail));
   }
@@ -56,14 +56,14 @@ export class CronjobDetailService {
       active: cronjob.active,
       eventType: cronjob.eventType,
       cronjobFormat: cronjob.cronjobFormat,
-      body: cronjob.body,
-    }
+      body: cronjob.body
+    };
     return this.gateway.apollo
       .mutate<any>({
         mutation: updateCronjob,
         variables: {
           input: cronjobUpdateInput
-        },
+        }
       })
       .pipe(map(rawData => rawData.data.updateCronjob));
   }
@@ -74,16 +74,25 @@ export class CronjobDetailService {
       active: cronjob.active,
       eventType: cronjob.eventType,
       cronjobFormat: cronjob.cronjobFormat,
-      body: cronjob.body,
-    }
+      body: cronjob.body
+    };
     return this.gateway.apollo
       .mutate<any>({
         mutation: persistCronjob,
         variables: {
           input: cronjobUpdateInput
-        },
+        }
       })
-      .pipe(map(rawData => rawData.data.persistCronjob));
+      .pipe(
+        map(rawData => {
+          {
+            if (rawData.errors) {
+              //TODO: aca se toma errores
+            }
+            return rawData.data.persistCronjob;
+          }
+        })
+      );
   }
 
   removeCronjobDetail$(cronjobId): Observable<any[]> {
@@ -92,11 +101,8 @@ export class CronjobDetailService {
         mutation: removeCronjob,
         variables: {
           cronjobId
-        },
+        }
       })
       .pipe(map(rawData => rawData.data.removeCronjob));
   }
-
 }
-
-

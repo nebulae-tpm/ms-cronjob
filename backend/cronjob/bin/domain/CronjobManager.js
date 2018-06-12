@@ -6,8 +6,8 @@ const Event = require('@nebulae/event-store').Event;
 const eventSourcing = require('../tools/EventSourcing')();
 const schedule = require('node-schedule');
 const uuidv4 = require('uuid/v4');
-const ThrowCapturer = require('rxjs/observable/throw');
 const parser = require('cron-parser');
+const { CustomError } = require('../tools/customError');
 
 let instance = null;
 
@@ -40,11 +40,6 @@ class CronjobManager {
         if (jobValue.active) {
           return schedule.scheduleJob(jobValue.cronjobFormat, function() {
             const body = jobValue.body ? JSON.parse(jobValue.body) : undefined;
-            
-            if (cronjob.name === 'CleanGroupNamesJobTriggered') {
-              console.log('Se ejecuta: ', cronjob.name);
-            }
-            
             eventSourcing.eventStore
               .emitEvent$(
                 new Event({
@@ -138,17 +133,18 @@ class CronjobManager {
 
   updateCronjob$(cronjob) {
     if (cronjob.body && !this.validateCronjobBody(cronjob.body)) {
-      return Rx.Observable.of({ code: 20001, message: 'Invalid body format' });
+      return Rx.Observable.throw(
+          new CustomError("CronjobManager", "updateCronjob$()", "14010",  {body: "Invalid body format"})
+        );
     }
     if (
       cronjob.cronjobFormat &&
       (!cronjob.cronjobFormat.trim() ||
         !this.validateCronjobFormat(cronjob.cronjobFormat))
     ) {
-      return Rx.Observable.of({
-        code: 20002,
-        message: 'Invalid cronjob format'
-      });
+      return Rx.Observable.throw(
+        new CustomError("CronjobManager", "updateCronjob$()", "14011",  {body: "Invalid cronjob format"})
+      );
     } else {
       const oldJobVsScheduleJob = this.jobVsScheduleJobList.filter(
         job => job.cronjob.id == cronjob.id
@@ -196,16 +192,17 @@ class CronjobManager {
 
   createCronjob$(cronjob) {
     if (cronjob.body && !this.validateCronjobBody(cronjob.body)) {
-      return Rx.Observable.of({ code: 20001, message: 'Invalid body format' });
+      return Rx.Observable.throw(
+        new CustomError("CronjobManager", "updateCronjob$()", "14010",  {body: "Invalid body format"})
+      );
     }
     if (
       !cronjob.cronjobFormat.trim() ||
       !this.validateCronjobFormat(cronjob.cronjobFormat)
     ) {
-      return Rx.Observable.of({
-        code: 20002,
-        message: 'Invalid cronjob format'
-      });
+      return Rx.Observable.throw(
+        new CustomError("CronjobManager", "updateCronjob$()", "14011",  {body: "Invalid cronjob format"})
+      );
     }
     {
       cronjob.id = uuidv4();

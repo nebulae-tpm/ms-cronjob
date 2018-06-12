@@ -1,6 +1,6 @@
 'use strict';
 
-const Cronjobs = require('../../domain/Cronjobs');
+const cronjobs = require('../../domain/Cronjobs')();
 const broker = require('../../tools/broker/BrokerFactory')();
 const Rx = require('rxjs');
 const jsonwebtoken = require('jsonwebtoken');
@@ -10,73 +10,174 @@ let instance;
 
 class GraphQlService {
   constructor() {
-    this.cronjobs = new Cronjobs();
     this.functionMap = this.generateFunctionMap();
+    this.subscriptions = [];
   }
 
   generateFunctionMap() {
     return {
-      'gateway.graphql.query.getCronjobDetail': this.cronjobs.getCronjobDetail,
-      'gateway.graphql.query.getCronjobs': this.cronjobs.getCronjobs,
-      'gateway.graphql.query.getCronjobTableSize': this.cronjobs.getCronjobTableSize,
-      'gateway.graphql.mutation.executeCronjob': this.cronjobs.executeCronjob,
-      'gateway.graphql.mutation.persistCronjob': this.cronjobs.persistCronjob,
-      'gateway.graphql.mutation.updateCronjob': this.cronjobs.updateCronjob,
-      'gateway.graphql.mutation.removeCronjob': this.cronjobs.removeCronjob
+      'gateway.graphql.query.getCronjobDetail': {
+        fn: cronjobs.getCronjobDetail,
+        obj: cronjobs
+      },
+      'gateway.graphql.query.getCronjobs':{
+        fn: cronjobs.getCronjobs,
+        obj: cronjobs
+      },
+      'gateway.graphql.query.getCronjobTableSize': {
+        fn: cronjobs.getCronjobTableSize,
+        obj: cronjobs
+      },        
+      'gateway.graphql.mutation.executeCronjob': {
+        fn: cronjobs.executeCronjob,
+        obj: cronjobs
+      },
+      'gateway.graphql.mutation.persistCronjob': {
+        fn: cronjobs.persistCronjob,
+        obj: cronjobs
+      },
+      'gateway.graphql.mutation.updateCronjob': {
+        fn: cronjobs.updateCronjob,
+        obj: cronjobs
+      },
+      'gateway.graphql.mutation.removeCronjob': {
+        fn: cronjobs.removeCronjob,
+        obj: cronjobs
+      }
     };
   }
 
   start$() {
-    return Rx.Observable.create(observer => {
-      this.subscription = broker
-        .getMessageListener$(['Cronjob'], Object.keys(this.functionMap))
-        //decode and verify the jwt token
-        .map(message => {
-          return {
-            authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey),
-            message
-          };
-        })
-        //ROUTE MESSAGE TO RESOLVER
-        .mergeMap(({ authToken, message }) =>
-          this.functionMap[message.type](message.data, authToken).map(
-            response => {
-              return {
-                response,
-                correlationId: message.id,
-                replyTo: message.attributes.replyTo
-              };
-            }
-          )
-        )
-        .mergeMap(({ response, correlationId, replyTo }) => {
-          if (replyTo) {
-            return broker.send$(
-              replyTo,
-              'gateway.graphql.Query.response',
-              response,
-              { correlationId }
-            );
-          } else {
-            return Rx.Observable.of(undefined);
-          }
-        })
-        //send response back if neccesary
-        .subscribe(val => {
-            // broker.send$('MaterializedViewUpdates','gateway.graphql.Subscription.response',response);
-            // console.log('Query response => ', val);
-          },
-          error => console.error('Error listening to messages', error),
-          () => {
-            console.log(`Message listener stopped`);
-          }
-        );
-      observer.next('GraphQlService is listening to Cronjob topic');
-      observer.complete();
-    });
+    const onErrorHandler = error => {
+      console.error("Error handling  GraphQl incoming event", error);
+      process.exit(1);
+    };
+
+    //default onComplete handler
+    const onCompleteHandler = () => {
+      () => console.log("GraphQlService incoming event subscription completed");
+    };
+    console.log("GraphQl Service starting ...");
+
+    return Rx.Observable.from([
+      {
+        aggregateType: "Cronjob",
+        messageType: "gateway.graphql.query.getCronjobDetail",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType:
+          "gateway.graphql.query.getCronjobs",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType:
+          "gateway.graphql.query.getCronjobTableSize",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType:
+          "gateway.graphql.mutation.executeCronjob",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType:
+          "gateway.graphql.mutation.persistCronjob",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType: "gateway.graphql.mutation.updateCronjob",
+        onErrorHandler,
+        onCompleteHandler
+      },
+      {
+        aggregateType: "Cronjob",
+        messageType: "gateway.graphql.mutation.removeCronjob",
+        onErrorHandler,
+        onCompleteHandler
+      }
+    ]).map(params => this.subscribeEventHandler(params));    
   }
 
-  stop() {}
+  
+  subscribeEventHandler({
+    aggregateType,
+    messageType,
+    onErrorHandler,
+    onCompleteHandler
+  }) {
+    const handler = this.functionMap[messageType];
+    const subscription = broker
+      .getMessageListener$([aggregateType], [messageType])
+      //decode and verify the jwt token
+      .map(message => {
+        return {
+          authToken: jsonwebtoken.verify(message.data.jwt, jwtPublicKey),
+          message
+        };
+      })
+      //ROUTE MESSAGE TO RESOLVER
+      .mergeMap(({ authToken, message }) =>
+        handler.fn
+          .call(handler.obj, message.data, authToken)
+          // .do(r => console.log("############################", r))
+          .map(response => {
+            return {
+              response,
+              correlationId: message.id,
+              replyTo: message.attributes.replyTo
+            };
+          })
+      )
+      //send response back if neccesary
+      .mergeMap(({ response, correlationId, replyTo }) => {
+        if (replyTo) {
+          return broker.send$(
+            replyTo,
+            "gateway.graphql.Query.response",
+            response,
+            { correlationId }
+          );
+        } else {
+          return Rx.Observable.of(undefined);
+        }
+      })
+      .subscribe(
+        msg => {
+          console.log(`GraphQlService process: ${msg}`);
+        },
+        onErrorHandler,
+        onCompleteHandler
+      );
+    this.subscriptions.push({
+      aggregateType,
+      messageType,
+      handlerName: handler.fn.name,
+      subscription
+    });
+    return {
+      aggregateType,
+      messageType,
+      handlerName: `${handler.obj.name}.${handler.fn.name}`
+    };
+  }
+
+  stop() {
+    Rx.Observable.from(this.subscriptions).map(subscription => {
+      subscription.subscription.unsubscribe();
+      return `Unsubscribed: aggregateType=${aggregateType}, eventType=${eventType}, handlerName=${handlerName}`;
+    });
+  }
 }
 
 module.exports = () => {
