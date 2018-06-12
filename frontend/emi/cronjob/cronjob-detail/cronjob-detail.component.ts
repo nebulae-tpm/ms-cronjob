@@ -3,12 +3,10 @@ import {
   FormBuilder,
   FormGroup,
   FormControl,
-  Validators,
-  ValidationErrors
+  Validators
 } from '@angular/forms';
 import { CronjobDetailService } from './cronjob-detail.service';
 import { first, filter } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
 import { CustomValidators } from './custom-validators';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { UpdateCronjobDialogComponent } from './update-cronjob-dialog/update-cronjob-dialog.component';

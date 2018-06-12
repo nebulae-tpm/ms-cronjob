@@ -44,7 +44,8 @@ export class CronjobDetailService {
         query: getCronjobDetail,
         variables: {
           id
-        }
+        },
+        fetchPolicy: "network-only"
       })
       .pipe(map(rawData => rawData.data.getCronjobDetail));
   }
