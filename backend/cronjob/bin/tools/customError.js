@@ -23,7 +23,7 @@ class CustomError extends Error {
   class DefaultError extends Error{
     constructor(message){
       super(message)
-      this.code = 12001;
+      this.code = 14001;
       this.msg = message;
     }
   }

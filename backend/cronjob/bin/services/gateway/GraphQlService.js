@@ -172,8 +172,8 @@ class GraphQlService {
     };
   }
 
-  stop() {
-    Rx.Observable.from(this.subscriptions).map(subscription => {
+  stop$() {
+    return Rx.Observable.from(this.subscriptions).map(subscription => {
       subscription.subscription.unsubscribe();
       return `Unsubscribed: aggregateType=${aggregateType}, eventType=${eventType}, handlerName=${handlerName}`;
     });
