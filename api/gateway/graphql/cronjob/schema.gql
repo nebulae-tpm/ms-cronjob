@@ -60,7 +60,7 @@ type Parameter {
 }
 
 type Query {
-  "Get Cronjob filtered by the device id"
+  "Get Cronjob filtered by the cronjob id"
   getCronjobDetail(id: String!): Cronjob
 
   "Get all cronjobs"
@@ -71,11 +71,16 @@ type Query {
 }
 
 type Mutation {
+  "Create a new cronjob"
   persistCronjob(input: CronjobPersistInput): CommandResponse
+  "update a cronjob filtered by id"
   updateCronjob(input: CronjobUpdateInput): CommandResponse
+  "remove a cronjob filtered by id"
   removeCronjob(cronjobId: String): CommandResponse
+  "execute a cronjob manually filtered by id"
   executeCronjob(cronjobId: String): CommandResponse
 }
 type Subscription {
+  "Identify when a cronjob has been updated and notify listeners"
   CronjobRegistersUpdated: Boolean
 }
