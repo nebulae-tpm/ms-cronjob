@@ -12,18 +12,13 @@ import {
   MatDialog,
   MatSnackBar
 } from '@angular/material';
-import { Observable } from 'rxjs/Observable';
+import { of, fromEvent } from 'rxjs';
 import { CronjobsService } from './cronjobs.service';
 import { CronjobDetailService } from '../cronjob-detail/cronjob-detail.service';
 import { locale as english } from '../i18n/en';
 import { locale as spanish } from '../i18n/es';
 import { FuseTranslationLoaderService } from '../../../../core/services/translation-loader.service';
-import 'rxjs/add/observable/merge';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/distinctUntilChanged';
-import { first, filter } from 'rxjs/operators';
+import { first, filter, mergeMap, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ExecuteCronjobDialogComponent } from './execute-cronjob-dialog/execute-cronjob-dialog.component';
 
 @Component({
@@ -93,10 +88,11 @@ export class CronjobsComponent implements OnInit {
       this.selectedCronjob = undefined;
     });
     this.subscriptions.push(
-      Observable.fromEvent(this.filter.nativeElement, 'keyup')
-        .debounceTime(150)
-        .distinctUntilChanged()
-        .subscribe(() => {
+      fromEvent(this.filter.nativeElement, 'keyup')
+        .pipe(
+          debounceTime(150),
+          distinctUntilChanged()
+        ).subscribe(() => {
           if (this.filter.nativeElement) {
             let filterValue = this.filter.nativeElement.value;
             filterValue = filterValue.trim();
@@ -139,14 +135,16 @@ export class CronjobsComponent implements OnInit {
     this.dialog
       .open(ExecuteCronjobDialogComponent)
       .afterClosed()
-      .pipe(filter(executeCronjob => executeCronjob))
-      .mergeMap(executeCronjob => {
-        if (executeCronjob) {
-          return this.cronjobsService.executeCronjob$(cronjobId).pipe(first());
-        } else {
-          Observable.of(undefined);
-        }
-      })
+      .pipe(
+        filter(executeCronjob => executeCronjob),
+        mergeMap(executeCronjob => {
+          if (executeCronjob) {
+            return this.cronjobsService.executeCronjob$(cronjobId).pipe(first());
+          } else {
+            of(undefined);
+          }
+        })
+      )
       .subscribe(result => {
         if (result) {
           this.snackBar.open(
