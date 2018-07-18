@@ -25,7 +25,8 @@
         "navURL": "/cronjob",
         "path": "cronjob",
         "loadChildren": "./main/content/cronjob/cronjob.module#CronjobModule",
-        "priority": 100000
+        "priority": 100000,
+        "roles" : ["developer"]
       }
     ],
     "preBuildCommands": [],
