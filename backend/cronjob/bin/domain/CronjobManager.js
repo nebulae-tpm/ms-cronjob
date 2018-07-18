@@ -48,8 +48,8 @@ class CronjobManager {
                   aggregateType: 'Cronjob',
                   aggregateId: cronjob.id,
                   data: body,
-                  //TODO: aca se debe colocar el usuario que periste el evento, si el sistema de debe colocar como
-                  // SYSTEM.Cronjob.cronjob
+                  //TODO: aca se debe colocar el usuario que periste el evento, si es el sistema el que ejecuta el cronjob 
+                  // se debe colocar como SYSTEM.Cronjob.cronjob
                   user: 'SYSTEM.Cronjob.cronjob'
                 })
               )
