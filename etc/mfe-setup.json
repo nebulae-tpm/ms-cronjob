@@ -10,7 +10,7 @@
           "en": "System",
           "es": "Sistema"
         },
-        "priority": 1000
+        "priority": 2000
       }
     ],
     "contents": [
@@ -25,7 +25,7 @@
         "navURL": "/cronjob",
         "path": "cronjob",
         "loadChildren": "./main/content/cronjob/cronjob.module#CronjobModule",
-        "priority": 100000,
+        "priority": 1000,
         "roles" : ["developer"]
       }
     ],
