@@ -28,6 +28,8 @@ spec:
   selector:
     matchLabels:
       app: cronjob-mongo
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
