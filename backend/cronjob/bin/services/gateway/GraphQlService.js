@@ -154,7 +154,7 @@ class GraphQlService {
       })
       .subscribe(
         msg => {
-          console.log(`GraphQlService process: ${msg}`);
+          //console.log(`GraphQlService process: ${msg}`);
         },
         onErrorHandler,
         onCompleteHandler
