@@ -3,6 +3,7 @@
 *Thumbs.db
 
 # Builds and distros
+playground/
 dist/
 
 # IDE Files

@@ -90,6 +90,9 @@ class Cronjobs {
   }
 }
 
+/**
+ * @returns {Cronjobs}
+ */
 module.exports = () => {
   if (!instance) {
     instance = new Cronjobs();
