@@ -6,7 +6,7 @@ import {
   Validators
 } from '@angular/forms';
 import { CronjobDetailService } from './cronjob-detail.service';
-import { first, filter } from 'rxjs/operators';
+import { first, filter, mergeMap, tap } from 'rxjs/operators';
 import { CustomValidators } from './custom-validators';
 import { MatDialog, MatSnackBar } from '@angular/material';
 import { UpdateCronjobDialogComponent } from './update-cronjob-dialog/update-cronjob-dialog.component';
@@ -15,6 +15,7 @@ import { RemoveCronjobDialogComponent } from './remove-cronjob-dialog/remove-cro
 
 
 @Component({
+  // tslint:disable-next-line:component-selector
   selector: 'app-cronjob-detail',
   templateUrl: './cronjob-detail.component.html',
   styleUrls: ['./cronjob-detail.component.scss']
@@ -50,7 +51,7 @@ export class CronjobDetailComponent implements OnInit {
   @Input()
   set cronjobDetailAction(cronjobDetailAction: any) {
     this._cronjobDetailAction = cronjobDetailAction;
-    this.addNewCronjob = cronjobDetailAction == 'ADD';
+    this.addNewCronjob = cronjobDetailAction === 'ADD';
     this.selectedCronjob = {};
   }
 
@@ -79,59 +80,50 @@ export class CronjobDetailComponent implements OnInit {
     this.dialog
       .open(UpdateCronjobDialogComponent)
       .afterClosed()
-      .pipe(filter(updateCronjob => updateCronjob))
-      .subscribe(updateCronjob => {
-        if (updateCronjob) {
-          this.cronjobDetailService
-            .updateCronjobDetail$(this.selectedCronjob)
-            .pipe(first())
-            .subscribe(model => {
-              this.snackBar.open('Tarea programada ha sido editada', 'Cerrar', {
-                duration: 2000
-              });
-            });
-        }
-      });
+      .pipe(
+        filter(updateCronjob => updateCronjob),
+        mergeMap(update => this.cronjobDetailService
+          .updateCronjobDetail$(this.selectedCronjob)
+          .pipe(first())
+        ),
+        tap(() => this.snackBar.open('Tarea programada ha sido editada', 'Cerrar', {
+          duration: 2000
+        }))
+      )
+      .subscribe(() => ok => { }, error => console.log(error), () => { });
   }
 
   createCronjob() {
     this.dialog
       .open(CreateCronjobDialogComponent)
       .afterClosed()
-      .pipe(filter(createCronjob => createCronjob))
-      .subscribe(createCronjob => {
-        if (createCronjob) {
-          this.cronjobDetailService
-            .createCronjobDetail$(this.selectedCronjob)
-            .pipe(first())
-            .subscribe(model => {
-              this.snackBar.open('Tarea programada ha sido creada', 'Cerrar', {
-                duration: 2000
-              });
-              this.cronjobDetailService.executeCloseDetail();
-            });
-        }
-      });
+      .pipe(
+        filter(createCronjob => createCronjob),
+        mergeMap(() => this.cronjobDetailService
+          .createCronjobDetail$(this.selectedCronjob)
+          .pipe(first())
+        ),
+        tap(() => {
+          this.snackBar.open('Tarea programada ha sido creada', 'Cerrar', {
+            duration: 2000
+          });
+          this.cronjobDetailService.executeCloseDetail();
+        })
+      )
+      .subscribe(() => ok => { }, error => console.log(error), () => { } );
   }
 
   removeCronjob() {
     this.dialog
       .open(RemoveCronjobDialogComponent)
       .afterClosed()
-      .pipe(filter(removeCronjob => removeCronjob))
-      .subscribe(removeCronjob => {
-        if (removeCronjob) {
-          this.cronjobDetailService
-            .removeCronjobDetail$(this.selectedCronjob.id)
-            .pipe(first())
-            .subscribe(model => {
-              this.snackBar.open('Tarea programada ha sido eliminada', 'Cerrar', {
-                duration: 2000
-              });
-              this.cronjobDetailService.executeCloseDetail();
-            });
-        }
-      });
+      .pipe(
+        filter(removeCronjob => removeCronjob),
+        mergeMap(() => this.cronjobDetailService.removeCronjobDetail$(this.selectedCronjob.id)
+          .pipe(first())),
+        tap(() => this.closeDetail())
+      )
+      .subscribe(() => ok => { }, error => console.log(error), () => { } );
   }
 
   closeDetail() {

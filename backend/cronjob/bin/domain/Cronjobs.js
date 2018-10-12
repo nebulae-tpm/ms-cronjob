@@ -45,8 +45,7 @@ class Cronjobs {
       .catch(err => this.errorHandler$(err));
   }
   removeCronjob({ root, args, jwt }, authToken) {
-    return cronjobManager
-      .removeCronjob$(args.cronjobId)
+    return cronjobManager.removeCronjob$(args.cronjobId, authToken.preferred_username )
       .mergeMap(rawResponse => this.buildSuccessResponse$(rawResponse))
       .catch(err => this.errorHandler$(err));
   }

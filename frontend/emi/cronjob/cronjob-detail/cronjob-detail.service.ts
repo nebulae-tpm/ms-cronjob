@@ -88,7 +88,7 @@ export class CronjobDetailService {
         map(rawData => {
           {
             if (rawData.errors) {
-              //TODO: aca se toma errores
+              //  TODO: aca se toma errores
             }
             return rawData.data.persistCronjob;
           }
@@ -104,6 +104,6 @@ export class CronjobDetailService {
           cronjobId
         }
       })
-      .pipe(map(rawData => rawData.data.removeCronjob));
+      .pipe(map(rawData => rawData.data.removeCronjob ));
   }
 }

@@ -93,36 +93,36 @@ class CronjobManager {
       });
   }
 
-  removeCronjob$(cronjobId) {
+  /**
+   * 
+   * @param {string} cronjobId cronjob Id to remove
+   * @param {*} responsibleUser User who removes the job
+   */
+  removeCronjob$(cronjobId, responsibleUser) {
     return Rx.Observable.of(cronjobId)
-      .map(jobId => {
-        return this.jobVsScheduleJobList.filter(
-          job => job.cronjob.id == cronjobId
-        )[0];
-      })
+      .map(() => this.jobVsScheduleJobList.filter( job => job.cronjob.id == cronjobId )[0] )
+      .filter(job => job)
       .do(job => {
-        if (job && job.scheduleJob) {
+        if (job.scheduleJob) {
           job.scheduleJob.cancel();
         }
       })
       .do(job => {
-        if (job) {
-          this.jobVsScheduleJobList.pull(job);
-        }
+        console.log(this.jobVsScheduleJobList.length);
+        this.jobVsScheduleJobList = this.jobVsScheduleJobList.filter(j => j != job)
       })
-      .mergeMap(job => {
-        return eventSourcing.eventStore.emitEvent$(
+      .mergeMap(job =>
+        eventSourcing.eventStore.emitEvent$(
           new Event({
             eventType: 'CronjobRemoved',
             eventTypeVersion: 1,
             aggregateType: 'Cronjob',
             aggregateId: job.cronjob.id,
             data: job.cronjob.id,
-            //TODO: aca se debe colocar el usuario que elimina el cronjob
-            user: 'SYSTEM.Cronjob.cronjob'
+            user: responsibleUser
           })
-        );
-      })
+        )
+      )
       .map(result => {
         return {
           code: 200,
@@ -257,6 +257,9 @@ class CronjobManager {
   }
 }
 
+/**
+ * @returns {CronjobManager}
+ */
 module.exports = () => {
   if (!instance) {
     instance = new CronjobManager();
