@@ -26,6 +26,9 @@ class CronjobEventConsumer {
 
 }
 
+/**
+ * @returns {CronjobEventConsumer}
+ */
 module.exports = () => {
     if (!instance) {
         instance = new CronjobEventConsumer();

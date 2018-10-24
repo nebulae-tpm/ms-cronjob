@@ -1,6 +1,11 @@
 /**
  * class to emcapsulute diferent errors.
  */
+
+ // please use the prefix assigned to this micorservice
+const INTERNAL_SERVER_ERROR_CODE = 00001;
+
+
 class CustomError extends Error {
     constructor(name, method, code, message) {
       super(message); 
@@ -21,10 +26,20 @@ class CustomError extends Error {
   };
 
   class DefaultError extends Error{
-    constructor(message){
-      super(message)
-      this.code = 14001;
-      this.msg = message;
+    constructor(anyError){
+      super(anyError.message)
+      this.code = INTERNAL_SERVER_ERROR_CODE;
+      this.name = anyError.name;
+      this.msg = anyError.message;
+      // this.stack = anyError.stack;
+    }
+
+    getContent(){
+      return{
+        code: this.code,
+        name: this.name,
+        msg: this.msg
+      }
     }
   }
 

@@ -67,23 +67,18 @@ class Cronjobs {
     });
   }
 
+
   errorHandler$(err) {
     return Rx.Observable.of(err).map(err => {
       const exception = { data: null, result: {} };
-      if (err instanceof CustomError) {
-        exception.result = {
-          code: err.code,
-          error: err.getContent()
-        };
-      } else {
-        exception.result = {
-          code: new DefaultError(err.message).code,
-          error: {
-            name: 'Error',
-            msg: err.toString()
-          }
-        };
+      const isCustomError = err instanceof CustomError;
+      if (!isCustomError) {
+        err = new DefaultError(err);
       }
+      exception.result = {
+        code: err.code,
+        error: { ...err.getContent() }
+      };
       return exception;
     });
   }
